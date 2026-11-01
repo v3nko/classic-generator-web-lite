@@ -72,17 +72,21 @@ export class GeneratorView {
 
     if (this.isCopied) {
       badgeEl.innerHTML = `
-        <span class="inline-flex items-center text-emerald-500 font-medium text-xs transition-all">
-          <span class="mr-1.5">${Icons.check}</span>
-          Copied to clipboard
+        <span class="inline-flex items-center text-xs gap-1.5 transition-colors text-emerald-500 font-medium">
+          <span class="w-3.5 h-3.5 flex items-center justify-center shrink-0 [&>svg]:w-3.5 [&>svg]:h-3.5">
+            ${Icons.check}
+          </span>
+          <span class="status-badge-text leading-none">Copied to clipboard</span>
         </span>
       `;
     } else {
       const summaryText = badgeEl.getAttribute('data-summary') || '';
       badgeEl.innerHTML = `
-        <span class="inline-flex items-center text-content-muted text-xs">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
-          ${summaryText}
+        <span class="inline-flex items-center text-xs gap-1.5 transition-colors text-content-muted">
+          <span class="w-3.5 h-3.5 flex items-center justify-center shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          </span>
+          <span class="status-badge-text leading-none">${summaryText}</span>
         </span>
       `;
     }
@@ -194,10 +198,12 @@ export class GeneratorView {
         </div>
 
         <!-- Status & Feedback Badge -->
-        <div id="status-badge" data-summary="${currentSummary}" class="shrink-0">
-          <span class="inline-flex items-center text-content-muted text-xs">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
-            ${currentSummary}
+        <div id="status-badge" data-summary="${currentSummary}" class="shrink-0 h-5 flex items-center select-none">
+          <span class="inline-flex items-center text-xs gap-1.5 transition-colors text-content-muted">
+            <span class="w-3.5 h-3.5 flex items-center justify-center shrink-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            </span>
+            <span class="status-badge-text leading-none">${currentSummary}</span>
           </span>
         </div>
 
