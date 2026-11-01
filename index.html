@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Classic Generator Web Lite</title>
+    <meta name="description" content="Desktop-first, client-side classic random generator utility." />
+
+    <!-- Favicon & App Icons (Modern SVG + PNG Fallbacks + Apple Touch + WebManifest) -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+
+    <link rel="stylesheet" href="./assets/app.css" />
+  </head>
+  <body class="bg-surface-base text-content-primary antialiased font-sans m-0 p-0 overflow-x-hidden">
+    <div id="app"></div>
+    <script type="module">
+      const isViteDev = Boolean(document.querySelector('script[src*="@vite/client"]'));
+      const target = isViteDev ? '/src/main.ts' : './assets/app.js';
+      import(/* @vite-ignore */ target).catch(() => {
+        import('./dist/assets/app.js');
+      });
+    </script>
+  </body>
+</html>

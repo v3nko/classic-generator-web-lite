@@ -1,0 +1,48 @@
+# Root: default to LF line endings for text files
+* text=auto eol=lf
+
+# Windows command / batch scripts must have CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts must have LF
+*.sh text eol=lf
+
+# Web source and config files (explicit LF)
+*.js text eol=lf
+*.ts text eol=lf
+*.jsx text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.webmanifest text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.svg text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Images and media (binary - no EOL conversion)
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.gif -text
+*.webp -text
+*.ico -text
+
+# Fonts (binary)
+*.woff -text
+*.woff2 -text
+*.ttf -text
+*.otf -text
+*.eot -text
+
+# Audio (binary)
+*.mp3 -text
+*.wav -text
+*.ogg -text
+
+# Archives and executables
+*.zip -text
+*.tar.gz -text
+*.exe -text

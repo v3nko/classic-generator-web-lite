@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --surface-base: #141517;
+  --surface-card: #1e2023;
+  --surface-card-border: #2e3137;
+  --surface-card-muted: #26282d;
+  --surface-inner: #18191c;
+  --surface-inner-border: #27292e;
+  --surface-pill-hover: #33363d;
+  --surface-sub-pill: #22252a;
+  --surface-sub-pill-border: #32363e;
+  --surface-sub-pill-active: #3f444e;
+
+  --text-primary: #ffffff;
+  --text-secondary: #d4d4d8;
+  --text-muted: #8f939d;
+  --text-subdued: #52525b;
+
+  --btn-primary-bg: #ffffff;
+  --btn-primary-text: #09090b;
+
+  --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+}
+
+html.light {
+  color-scheme: light;
+  --surface-base: #f0f2f5;
+  --surface-card: #ffffff;
+  --surface-card-border: #e2e8f0;
+  --surface-card-muted: #f1f5f9;
+  --surface-inner: #f8fafc;
+  --surface-inner-border: #e2e8f0;
+  --surface-pill-hover: #e2e8f0;
+  --surface-sub-pill: #ffffff;
+  --surface-sub-pill-border: #cbd5e1;
+  --surface-sub-pill-active: #0f172a;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-subdued: #94a3b8;
+
+  --btn-primary-bg: #0f172a;
+  --btn-primary-text: #ffffff;
+
+  --card-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 1px 4px 0 rgba(15, 23, 42, 0.04);
+  --modal-overlay: rgba(15, 23, 42, 0.45);
+}
+
+body {
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+}
+
+/* Custom scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--surface-pill-hover);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--text-subdued);
+}
