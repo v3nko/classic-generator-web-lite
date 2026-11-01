@@ -1,11 +1,24 @@
 # Classic Generator Web Lite
 
+<p align="center">
+  <img src="favicon.svg" alt="Classic Generator Logo" width="80" height="80" />
+</p>
+
 A desktop-first, lightweight, 100% client-side web version of Classic Generator. Inspired by the sleek dark card design of modern desktop utilities, it delivers instant, offline-capable random generation with browser `localStorage` persistence, Web Audio API sound feedback, and comprehensive keyboard shortcuts.
+
+<p align="center">
+  <img src="docs/screenshots/browser-mode.png" alt="Classic Generator Web Lite - Browser Mode" />
+</p>
 
 ---
 
 ## Features
 
+- **Installable Desktop App (PWA)**: Installable directly as a standalone desktop app via modern browsers, featuring custom window geometry, service worker offline caching, and responsive fluid layout.
+
+  <p align="center">
+    <img src="docs/screenshots/standalone-pwa.png" alt="Classic Generator Web Lite - Standalone Desktop App" />
+  </p>
 - **Client-Side Only**: Runs entirely in the browser with zero external server dependencies. Works offline.
 - **Local Storage Persistence**: Generation history, options, active generator selection, sound state, and theme preferences persist automatically in browser `localStorage`.
 - **Two Generators (Android ClassicGenerator Parity)**:
