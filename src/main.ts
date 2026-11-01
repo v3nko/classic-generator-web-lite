@@ -24,6 +24,7 @@ class App {
   private historyView: HistoryView;
   private shortcutsModal: ShortcutsModal;
   private keyboardManager: KeyboardManager;
+  private deferredInstallPrompt: any = null;
 
   constructor() {
     this.storage = StorageService.getInstance();
@@ -33,10 +34,10 @@ class App {
     if (!appEl) throw new Error('#app element not found');
 
     appEl.innerHTML = `
-      <main class="min-h-screen w-full flex items-center justify-center p-4 bg-surface-base transition-colors select-none">
-        <div class="relative w-full max-w-[500px]">
+      <main id="main-viewport" class="min-h-full h-full w-full flex items-center justify-center p-4 bg-surface-base transition-colors select-none">
+        <div id="card-wrapper" class="relative w-full max-w-[500px]">
           <!-- App Logo positioned on top of the card without shifting the card down from vertical center -->
-          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-5 flex items-center justify-center pointer-events-none">
+          <div class="standalone-hidden absolute bottom-full left-1/2 -translate-x-1/2 mb-5 flex items-center justify-center pointer-events-none">
             <img src="./favicon.svg" alt="Classic Generator" class="w-12 h-12 drop-shadow-lg select-none" />
           </div>
 
@@ -46,7 +47,7 @@ class App {
             class="w-full bg-surface-card border border-surface-cardBorder rounded-3xl shadow-card-glow overflow-hidden transition-all duration-200"
           >
             <!-- In-card view container -->
-            <div id="view-mount"></div>
+            <div id="view-mount" class="h-full"></div>
           </div>
         </div>
       </main>
@@ -73,6 +74,7 @@ class App {
         this.storage.setNumFixedOptions(opts);
         AudioEngine.playGenerateSound();
       },
+      onInstallApp: () => this.handleInstallApp(),
     });
 
     this.optionsView = new OptionsView(this.cardContainer, {
@@ -129,6 +131,9 @@ class App {
   }
 
   private init() {
+    this.setupStandaloneMode();
+    this.setupPwaInstall();
+    this.registerServiceWorker();
     this.keyboardManager.start();
 
     // Subscribe to state changes to re-render
@@ -252,6 +257,127 @@ class App {
     } else {
       document.documentElement.classList.remove('light');
       document.documentElement.classList.add('dark');
+    }
+  }
+
+  private setupStandaloneMode() {
+    // Content comfortably fits in ~440px.
+    // Minimum inner viewport dimensions to ensure zero scrolling:
+    const MIN_INNER_WIDTH = 440;
+    const MIN_INNER_HEIGHT = 520;
+    const TARGET_WIDTH = 500;
+    const TARGET_HEIGHT = 650;
+
+    const enforceMinDimensions = () => {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+        window.matchMedia('(display-mode: minimal-ui)').matches ||
+        (window.navigator as any).standalone === true;
+
+      if (!isStandalone) return;
+
+      const innerW = window.innerWidth;
+      const innerH = window.innerHeight;
+
+      if (innerH < MIN_INNER_HEIGHT || innerW < MIN_INNER_WIDTH) {
+        try {
+          const safeOuterW = Math.max(window.outerWidth, TARGET_WIDTH);
+          const safeOuterH = Math.max(window.outerHeight, TARGET_HEIGHT);
+          window.resizeTo(safeOuterW, safeOuterH);
+        } catch {
+          // May be restricted by some window managers
+        }
+      }
+    };
+
+    const checkAndApply = () => {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+        window.matchMedia('(display-mode: minimal-ui)').matches ||
+        (window.navigator as any).standalone === true;
+
+      if (isStandalone) {
+        document.documentElement.classList.add('is-standalone');
+        this.generatorView.setCanInstall(false);
+
+        // In installed window, attempt to size to the ideal app dimensions mirroring the design
+        try {
+          if (
+            Math.abs(window.outerWidth - TARGET_WIDTH) > 30 ||
+            Math.abs(window.outerHeight - TARGET_HEIGHT) > 30
+          ) {
+            window.resizeTo(TARGET_WIDTH, TARGET_HEIGHT);
+          }
+        } catch {
+          // Window resizeTo may be restricted by some browser window managers
+        }
+      } else {
+        document.documentElement.classList.remove('is-standalone');
+      }
+    };
+
+    checkAndApply();
+
+    try {
+      const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+      standaloneQuery.addEventListener('change', checkAndApply);
+    } catch {}
+
+    // Enforce minimal height on resize when in standalone mode
+    let resizeTimer: number | null = null;
+    window.addEventListener('resize', () => {
+      if (resizeTimer !== null) {
+        window.clearTimeout(resizeTimer);
+      }
+      resizeTimer = window.setTimeout(() => {
+        enforceMinDimensions();
+      }, 120);
+    });
+  }
+
+  private setupPwaInstall() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredInstallPrompt = e;
+      this.generatorView.setCanInstall(true);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      this.deferredInstallPrompt = null;
+      this.generatorView.setCanInstall(false);
+    });
+  }
+
+  private async handleInstallApp() {
+    if (!this.deferredInstallPrompt) return;
+
+    try {
+      this.deferredInstallPrompt.prompt();
+      const choice = await this.deferredInstallPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') {
+        this.generatorView.setCanInstall(false);
+      }
+    } catch (err) {
+      console.warn('[PWA] Install prompt failed:', err);
+    } finally {
+      this.deferredInstallPrompt = null;
+    }
+  }
+
+  private registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('./sw.js')
+          .then((reg) => {
+            console.log('[PWA] Service Worker registered:', reg.scope);
+          })
+          .catch((err) => {
+            console.warn('[PWA] Service Worker registration failed:', err);
+          });
+      });
     }
   }
 }

@@ -40,9 +40,9 @@ export class HistoryView {
     const totalCount = state.history.length;
 
     this.container.innerHTML = `
-      <div class="p-6 md:p-8 flex flex-col gap-5">
+      <div class="view-container p-5 md:p-6 flex flex-col justify-between h-full min-h-0 gap-4 flex-1 overflow-hidden">
         <!-- Header -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3">
             <button
               id="btn-history-back"
@@ -63,7 +63,7 @@ export class HistoryView {
         ${
           totalCount > 4
             ? `
-          <div class="relative">
+          <div class="relative shrink-0">
             <input
               id="input-history-search"
               type="text"
@@ -86,7 +86,7 @@ export class HistoryView {
         }
 
         <!-- History Items Scrollable List -->
-        <div class="flex flex-col gap-2 max-h-[340px] overflow-y-auto pr-1 select-text scrollbar-thin">
+        <div class="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto pr-1 select-text scrollbar-thin">
           ${
             filteredHistory.length > 0
               ? filteredHistory.map(item => this.renderHistoryItem(item)).join('')
@@ -95,7 +95,7 @@ export class HistoryView {
         </div>
 
         <!-- Bottom Action Pills -->
-        <div class="grid grid-cols-2 gap-3 pt-2">
+        <div class="grid grid-cols-2 gap-3 pt-2 mt-auto shrink-0">
           <button
             id="btn-back-to-generator"
             type="button"

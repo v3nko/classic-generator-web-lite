@@ -44,9 +44,9 @@ export class OptionsView {
     const title = isNum ? 'Numeric options' : 'Numeric fixed options';
 
     this.container.innerHTML = `
-      <div class="p-6 md:p-8 flex flex-col gap-6">
+      <div class="view-container p-5 md:p-6 flex flex-col justify-between h-full min-h-0 gap-5 flex-1">
         <!-- Header -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3">
             <button
               id="btn-options-back"
@@ -64,7 +64,7 @@ export class OptionsView {
         </div>
 
         <!-- Options Form Body -->
-        <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-5 flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin">
           ${isNum ? this.renderNumOptions() : this.renderNumFixedOptions()}
 
           <!-- Error Alert (if any) -->
@@ -74,7 +74,7 @@ export class OptionsView {
         </div>
 
         <!-- Bottom Action Pills -->
-        <div class="grid grid-cols-2 gap-3 pt-2">
+        <div class="grid grid-cols-2 gap-3 pt-2 mt-auto shrink-0">
           <button
             id="btn-cancel-options"
             type="button"

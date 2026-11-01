@@ -1,10 +1,17 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en" class="dark h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Classic Generator Web Lite</title>
     <meta name="description" content="Desktop-first, client-side classic random generator utility." />
+
+    <!-- PWA & Mobile Meta Tags -->
+    <meta name="theme-color" content="#1e2023" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ClassicGen" />
 
     <!-- Favicon & App Icons (Modern SVG + PNG Fallbacks + Apple Touch + WebManifest) -->
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -15,8 +22,8 @@
 
     <link rel="stylesheet" href="./assets/app.css" />
   </head>
-  <body class="bg-surface-base text-content-primary antialiased font-sans m-0 p-0 overflow-x-hidden">
-    <div id="app"></div>
+  <body class="bg-surface-base text-content-primary antialiased font-sans m-0 p-0 overflow-x-hidden h-full">
+    <div id="app" class="w-full h-full"></div>
     <script type="module">
       const isViteDev = Boolean(document.querySelector('script[src*="@vite/client"]'));
       const target = isViteDev ? '/src/main.ts' : './assets/app.js';

@@ -74,3 +74,160 @@ body {
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: var(--text-subdued);
 }
+
+/* Card constraints in standard browser mode */
+#card-root {
+  min-height: min(460px, calc(100vh - 140px));
+  max-height: min(650px, calc(100vh - 140px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#view-mount {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Standalone / Installed PWA Display Mode */
+@media (display-mode: standalone), (display-mode: window-controls-overlay), (display-mode: minimal-ui) {
+  html, body, #app {
+    height: 100% !important;
+    min-height: 100% !important;
+    overflow: hidden;
+    background-color: var(--surface-card);
+  }
+
+  .standalone-hidden {
+    display: none !important;
+  }
+
+  .standalone-show {
+    display: inline-flex !important;
+  }
+
+  #main-viewport {
+    height: 100% !important;
+    min-height: 100% !important;
+    padding: 0 !important;
+    background-color: var(--surface-card) !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  #card-wrapper {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  #card-root {
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    background-color: var(--surface-card) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0% !important;
+  }
+
+  #view-mount {
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0% !important;
+    overflow-y: auto !important;
+  }
+
+  .view-container {
+    height: 100% !important;
+    min-height: 100% !important;
+    flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+}
+
+/* Fallback class on html for standalone environments */
+html.is-standalone,
+html.is-standalone body,
+html.is-standalone #app {
+  height: 100% !important;
+  min-height: 100% !important;
+  overflow: hidden;
+  background-color: var(--surface-card);
+}
+
+html.is-standalone .standalone-hidden {
+  display: none !important;
+}
+
+html.is-standalone .standalone-show {
+  display: inline-flex !important;
+}
+
+html.is-standalone #main-viewport {
+  height: 100% !important;
+  min-height: 100% !important;
+  padding: 0 !important;
+  background-color: var(--surface-card) !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+html.is-standalone #card-wrapper {
+  max-width: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  flex: 1 1 0% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+html.is-standalone #card-root {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: none !important;
+  background-color: var(--surface-card) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0% !important;
+}
+
+html.is-standalone #view-mount {
+  height: 100% !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0% !important;
+  overflow-y: auto !important;
+}
+
+html.is-standalone .view-container {
+  height: 100% !important;
+  min-height: 100% !important;
+  flex: 1 1 0% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}

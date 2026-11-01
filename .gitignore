@@ -1,3 +1,30 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Production & Build outputs
+dist
+dist-ssr
+/assets/
+*.tsbuildinfo
+
+# Vite & Bundler temporary files
+vite.config.*.timestamp-*
+
+# Environment and Secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Test & Coverage
+coverage
+*.lcov
+.vitest
+
+# Cloudflare Pages / Wrangler
+.wrangler
+
 # Logs
 logs
 *.log
@@ -7,19 +34,27 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-/assets/
-*.local
+# Temporary files & Scratch
+tmp/
+temp/
 
-# Editor directories and files
+# Editor & IDE directories
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.history/
+
+# Operating System files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+[Dd]esktop.ini

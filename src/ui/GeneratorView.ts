@@ -20,6 +20,7 @@ export interface GeneratorViewCallbacks {
   onOpenShortcuts: () => void;
   onQuickUpdateNum: (options: NumOptions) => void;
   onQuickUpdateNumFixed: (options: NumFixedOptions) => void;
+  onInstallApp?: () => void;
 }
 
 export class GeneratorView {
@@ -27,10 +28,30 @@ export class GeneratorView {
   private callbacks: GeneratorViewCallbacks;
   private copyTimeout: number | null = null;
   private isCopied = false;
+  private canInstall = false;
 
   constructor(container: HTMLElement, callbacks: GeneratorViewCallbacks) {
     this.container = container;
     this.callbacks = callbacks;
+  }
+
+  public setCanInstall(canInstall: boolean) {
+    this.canInstall = canInstall;
+    const btn = this.container.querySelector('#btn-install-pwa');
+    const sep = this.container.querySelector('#install-separator');
+    if (btn) {
+      if (canInstall) {
+        btn.classList.remove('hidden');
+        btn.classList.add('inline-flex');
+        sep?.classList.remove('hidden');
+        sep?.classList.add('inline');
+      } else {
+        btn.classList.add('hidden');
+        btn.classList.remove('inline-flex');
+        sep?.classList.add('hidden');
+        sep?.classList.remove('inline');
+      }
+    }
   }
 
   public showCopiedFeedback() {
@@ -95,43 +116,46 @@ export class GeneratorView {
     const historyCount = state.history.length;
 
     this.container.innerHTML = `
-      <div class="p-6 md:p-8 flex flex-col gap-6">
+      <div class="view-container p-5 md:p-6 flex flex-col justify-between h-full min-h-0 gap-4 md:gap-5 flex-1">
         <!-- Top Header: Generator Selector + Utility Toolbar -->
-        <div class="flex items-center justify-between gap-3">
-          <!-- Generator Selector Pills -->
-          <div class="inline-flex items-center p-1 bg-surface-inner border border-surface-innerBorder rounded-xl">
-            <button
-              id="btn-tab-num"
-              type="button"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                state.activeGenerator === 'num'
-                  ? 'bg-surface-card text-content-primary shadow-sm border border-surface-cardBorder'
-                  : 'text-content-muted hover:text-content-primary'
-              }"
-            >
-              <span class="w-4 h-4 rounded-full ${
-                state.activeGenerator === 'num'
-                  ? 'bg-content-primary text-surface-card font-bold'
-                  : 'bg-surface-cardMuted text-content-muted border border-surface-innerBorder font-medium'
-              } text-[10px] flex items-center justify-center">N</span>
-              Numeric
-            </button>
-            <button
-              id="btn-tab-fixed"
-              type="button"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                state.activeGenerator === 'num_fixed'
-                  ? 'bg-surface-card text-content-primary shadow-sm border border-surface-cardBorder'
-                  : 'text-content-muted hover:text-content-primary'
-              }"
-            >
-              <span class="w-4 h-4 rounded-full ${
-                state.activeGenerator === 'num_fixed'
-                  ? 'bg-content-primary text-surface-card font-bold'
-                  : 'bg-surface-cardMuted text-content-muted border border-surface-innerBorder font-medium'
-              } text-[10px] flex items-center justify-center">F</span>
-              Numeric fixed
-            </button>
+        <div class="flex items-center justify-between gap-3 shrink-0">
+          <!-- Generator Selector Pills (+ Standalone App Icon) -->
+          <div class="flex items-center gap-2.5">
+            <img src="./favicon.svg" alt="Classic Generator" class="w-7 h-7 drop-shadow-sm select-none hidden standalone-show" />
+            <div class="inline-flex items-center p-1 bg-surface-inner border border-surface-innerBorder rounded-xl">
+              <button
+                id="btn-tab-num"
+                type="button"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                  state.activeGenerator === 'num'
+                    ? 'bg-surface-card text-content-primary shadow-sm border border-surface-cardBorder'
+                    : 'text-content-muted hover:text-content-primary'
+                }"
+              >
+                <span class="w-4 h-4 rounded-full ${
+                  state.activeGenerator === 'num'
+                    ? 'bg-content-primary text-surface-card font-bold'
+                    : 'bg-surface-cardMuted text-content-muted border border-surface-innerBorder font-medium'
+                } text-[10px] flex items-center justify-center">N</span>
+                Numeric
+              </button>
+              <button
+                id="btn-tab-fixed"
+                type="button"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                  state.activeGenerator === 'num_fixed'
+                    ? 'bg-surface-card text-content-primary shadow-sm border border-surface-cardBorder'
+                    : 'text-content-muted hover:text-content-primary'
+                }"
+              >
+                <span class="w-4 h-4 rounded-full ${
+                  state.activeGenerator === 'num_fixed'
+                    ? 'bg-content-primary text-surface-card font-bold'
+                    : 'bg-surface-cardMuted text-content-muted border border-surface-innerBorder font-medium'
+                } text-[10px] flex items-center justify-center">F</span>
+                Numeric fixed
+              </button>
+            </div>
           </div>
 
           <!-- Quick Action Toolbar -->
@@ -170,7 +194,7 @@ export class GeneratorView {
         </div>
 
         <!-- Status & Feedback Badge -->
-        <div id="status-badge" data-summary="${currentSummary}">
+        <div id="status-badge" data-summary="${currentSummary}" class="shrink-0">
           <span class="inline-flex items-center text-content-muted text-xs">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
             ${currentSummary}
@@ -180,10 +204,10 @@ export class GeneratorView {
         <!-- Heroic Generated Value Display (Click to Copy) -->
         <div
           id="hero-value-container"
-          class="group relative py-6 px-4 bg-surface-inner hover:bg-surface-pillHover/50 border border-surface-innerBorder hover:border-surface-cardBorder rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-center min-h-[110px]"
+          class="group relative py-6 px-4 bg-surface-inner hover:bg-surface-pillHover/50 border border-surface-innerBorder hover:border-surface-cardBorder rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-center min-h-[110px] flex-1"
           title="Click to copy (C)"
         >
-          <div class="font-mono text-3xl md:text-4xl font-bold tracking-wider text-center break-all select-all flex flex-wrap items-center justify-center">
+          <div class="font-mono text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider text-center break-all select-all flex flex-wrap items-center justify-center">
             ${formattedHtml}
           </div>
           <div class="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-content-muted flex items-center gap-1">
@@ -193,7 +217,7 @@ export class GeneratorView {
         </div>
 
         <!-- Inner Sub-Card: Interactive Quick Adjuster -->
-        <div class="p-3.5 bg-surface-inner border border-surface-innerBorder rounded-2xl flex flex-col gap-2.5">
+        <div class="p-3.5 bg-surface-inner border border-surface-innerBorder rounded-2xl flex flex-col gap-2.5 shrink-0">
           <div class="flex items-center justify-between text-xs">
             <span class="text-content-muted font-medium">${isFixed ? 'Digit count' : 'Quick range'}</span>
             <span class="font-mono text-xs font-semibold text-content-primary px-2 py-0.5 rounded bg-surface-card border border-surface-cardBorder shadow-xs">
@@ -300,7 +324,7 @@ export class GeneratorView {
         </div>
 
         <!-- Bottom Action Pills: Edit Options & Generate -->
-        <div class="grid grid-cols-2 gap-3 pt-2">
+        <div class="grid grid-cols-2 gap-3 pt-2 shrink-0">
           <button
             id="btn-edit-options"
             type="button"
@@ -320,13 +344,25 @@ export class GeneratorView {
           </button>
         </div>
 
-        <!-- Desktop Hint -->
-        <div class="flex items-center justify-between text-[11px] text-content-subdued pt-1 px-1">
+        <!-- Desktop Hint & Install Link -->
+        <div class="flex items-center justify-between text-[11px] text-content-subdued pt-1 px-1 shrink-0">
           <button id="btn-shortcuts-hint" type="button" class="hover:text-content-muted transition-colors flex items-center gap-1">
             ${Icons.keyboard}
             <span>Shortcuts: <kbd class="px-1 py-0.5 rounded bg-surface-inner border border-surface-innerBorder text-content-secondary text-[10px]">Space</kbd> Generate · <kbd class="px-1 py-0.5 rounded bg-surface-inner border border-surface-innerBorder text-content-secondary text-[10px]">C</kbd> Copy</span>
           </button>
-          <span>${APP_VERSION} Lite</span>
+          <div class="flex items-center gap-1.5">
+            <button
+              id="btn-install-pwa"
+              type="button"
+              title="Install as desktop app"
+              class="${this.canInstall ? 'inline-flex' : 'hidden'} items-center gap-1 text-emerald-400 hover:text-emerald-300 font-medium transition-colors cursor-pointer"
+            >
+              ${Icons.download}
+              <span>Install app</span>
+            </button>
+            <span id="install-separator" class="${this.canInstall ? 'inline' : 'hidden'} text-content-subdued select-none">·</span>
+            <span>${APP_VERSION} Lite</span>
+          </div>
         </div>
       </div>
     `;
@@ -353,6 +389,10 @@ export class GeneratorView {
 
     this.container.querySelector('#btn-open-history')?.addEventListener('click', () => {
       this.callbacks.onOpenHistory();
+    });
+
+    this.container.querySelector('#btn-install-pwa')?.addEventListener('click', () => {
+      this.callbacks.onInstallApp?.();
     });
 
     this.container.querySelector('#hero-value-container')?.addEventListener('click', () => {
