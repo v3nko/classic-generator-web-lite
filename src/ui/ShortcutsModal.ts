@@ -69,7 +69,7 @@ export class ShortcutsModal {
         <div class="flex items-center justify-between pb-2 border-b border-surface-innerBorder">
           <div class="flex items-center gap-2">
             <span class="text-content-muted">${Icons.keyboard}</span>
-            <h3 class="font-semibold text-sm">Keyboard Shortcuts</h3>
+            <h3 class="font-semibold text-sm">Keyboard Shortcuts & About</h3>
           </div>
           <button id="btn-close-modal" type="button" class="w-7 h-7 rounded-lg flex items-center justify-center text-content-muted hover:text-content-primary hover:bg-surface-cardMuted transition-colors">
             ${Icons.close}
@@ -91,8 +91,19 @@ export class ShortcutsModal {
             .join('')}
         </div>
 
-        <div class="pt-2 text-center text-[11px] text-content-subdued border-t border-surface-innerBorder">
-          Press <kbd class="px-1 py-0.5 rounded bg-surface-inner border border-surface-innerBorder text-content-secondary text-[10px]">Esc</kbd> to close
+        <!-- About & Credits Footer -->
+        <div class="pt-3 border-t border-surface-innerBorder flex flex-col items-center gap-1.5 text-center">
+          <p class="text-xs text-content-secondary">
+            Classic Generator Web Lite · by Victor Kosenko (<a
+              href="https://venko.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-emerald-400 hover:text-emerald-300 font-medium underline underline-offset-2 transition-colors inline-flex items-center gap-0.5"
+            >venko.me</a>)
+          </p>
+          <span class="text-[11px] text-content-subdued">
+            Press <kbd class="px-1 py-0.5 rounded bg-surface-inner border border-surface-innerBorder text-content-secondary text-[10px]">Esc</kbd> to close
+          </span>
         </div>
       </div>
     `;
