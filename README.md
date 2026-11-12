@@ -126,3 +126,7 @@ You can also deploy directly from your local terminal using Wrangler:
 pnpm build
 npx wrangler pages deploy dist --project-name classic-generator-web-lite
 ```
+
+## License
+
+[Mozilla Public License Version 2.0](/LICENSE)
