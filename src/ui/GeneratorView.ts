@@ -104,18 +104,23 @@ export class GeneratorView {
       currentSummary = `Fixed: ${len} ${len === 1 ? 'digit' : 'digits'}`;
     }
 
-    // Current displayed value (fallback to a generated default or placeholder)
-    const currentValue = state.lastGenerated?.value || (isFixed ? '000000' : '42');
-    const chunks = RandomEngine.formatChunked(currentValue, isFixed);
+    const hasValue = Boolean(state.lastGenerated);
+    const currentValue = state.lastGenerated?.value || '';
 
-    // Format chunks with alternating contrast like the inspiration card (primary / muted)
-    const formattedHtml = chunks
-      .map((chunk, idx) => {
-        const isPrimary = idx % 2 === 0;
-        const colorClass = isPrimary ? 'text-content-primary' : 'text-content-muted';
-        return `<span class="${colorClass}">${chunk}</span>`;
-      })
-      .join('<span class="mx-1.5 text-content-subdued font-normal select-none"> </span>');
+    let formattedHtml = '';
+    if (hasValue) {
+      const chunks = RandomEngine.formatChunked(currentValue, isFixed);
+      // Format chunks with alternating contrast like the inspiration card (primary / muted)
+      formattedHtml = chunks
+        .map((chunk, idx) => {
+          const isPrimary = idx % 2 === 0;
+          const colorClass = isPrimary ? 'text-content-primary' : 'text-content-muted';
+          return `<span class="${colorClass}">${chunk}</span>`;
+        })
+        .join('<span class="mx-1.5 text-content-subdued font-normal select-none"> </span>');
+    } else {
+      formattedHtml = '<span class="text-content-subdued select-none font-normal">—</span>';
+    }
 
     const historyCount = state.history.length;
 
@@ -207,19 +212,29 @@ export class GeneratorView {
           </span>
         </div>
 
-        <!-- Heroic Generated Value Display (Click to Copy) -->
+        <!-- Heroic Generated Value Display (Click to Copy when value is present) -->
         <div
           id="hero-value-container"
-          class="group relative py-6 px-4 bg-surface-inner hover:bg-surface-pillHover/50 border border-surface-innerBorder hover:border-surface-cardBorder rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-center min-h-[110px] flex-1"
-          title="Click to copy (C)"
+          class="group relative py-6 px-4 bg-surface-inner ${
+            hasValue
+              ? 'hover:bg-surface-pillHover/50 hover:border-surface-cardBorder cursor-pointer'
+              : 'cursor-default'
+          } border border-surface-innerBorder rounded-2xl transition-all flex flex-col items-center justify-center min-h-[110px] flex-1"
+          ${hasValue ? 'title="Click to copy (C)"' : ''}
         >
           <div class="font-mono text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider text-center break-all select-all flex flex-wrap items-center justify-center">
             ${formattedHtml}
           </div>
-          <div class="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-content-muted flex items-center gap-1">
-            ${Icons.copy}
-            <span>Copy</span>
-          </div>
+          ${
+            hasValue
+              ? `
+            <div class="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-content-muted flex items-center gap-1">
+              ${Icons.copy}
+              <span>Copy</span>
+            </div>
+          `
+              : ''
+          }
         </div>
 
         <!-- Inner Sub-Card: Interactive Quick Adjuster -->
@@ -401,9 +416,11 @@ export class GeneratorView {
       this.callbacks.onInstallApp?.();
     });
 
-    this.container.querySelector('#hero-value-container')?.addEventListener('click', () => {
-      this.callbacks.onCopyValue(currentValue);
-    });
+    if (currentValue) {
+      this.container.querySelector('#hero-value-container')?.addEventListener('click', () => {
+        this.callbacks.onCopyValue(currentValue);
+      });
+    }
 
     this.container.querySelector('#btn-edit-options')?.addEventListener('click', () => {
       this.callbacks.onEditOptions();

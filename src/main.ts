@@ -145,13 +145,7 @@ class App {
     // Initial sync
     const initial = this.storage.getState();
     this.syncTheme(initial.theme);
-
-    // If no values have been generated yet, generate one initial value automatically for an instant lively look
-    if (!initial.lastGenerated) {
-      this.handleGenerate(false);
-    } else {
-      this.renderCurrentView();
-    }
+    this.renderCurrentView();
   }
 
   private setView(view: ActiveView) {
