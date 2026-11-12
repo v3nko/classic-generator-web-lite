@@ -40,7 +40,7 @@ export class HistoryView {
     const totalCount = state.history.length;
 
     this.container.innerHTML = `
-      <div class="view-container p-5 md:p-6 flex flex-col justify-between h-full min-h-0 gap-4 flex-1 overflow-hidden">
+      <div class="view-container p-6 flex flex-col justify-between h-full min-h-0 gap-4 flex-1 overflow-hidden">
         <!-- Header -->
         <div class="flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3">

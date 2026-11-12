@@ -149,6 +149,9 @@ class App {
   }
 
   private setView(view: ActiveView) {
+    if (this.activeView === 'generator' && view !== 'generator') {
+      this.generatorView.destroy();
+    }
     this.activeView = view;
     this.renderCurrentView();
   }

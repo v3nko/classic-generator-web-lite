@@ -29,6 +29,8 @@ export class GeneratorView {
   private copyTimeout: number | null = null;
   private isCopied = false;
   private canInstall = false;
+  private resizeObserver: ResizeObserver | null = null;
+  private isFitting = false;
 
   constructor(container: HTMLElement, callbacks: GeneratorViewCallbacks) {
     this.container = container;
@@ -106,6 +108,8 @@ export class GeneratorView {
 
     const hasValue = Boolean(state.lastGenerated);
     const currentValue = state.lastGenerated?.value || '';
+    const fontSizeClass = resolveHeroFontSizeClass(currentValue.length || 1);
+    const trackingClass = resolveHeroTrackingClass(currentValue.length || 1);
 
     let formattedHtml = '';
     if (hasValue) {
@@ -126,7 +130,7 @@ export class GeneratorView {
     const historyCount = state.history.length;
 
     this.container.innerHTML = `
-      <div class="view-container p-5 md:p-6 flex flex-col justify-between h-full min-h-0 gap-4 md:gap-5 flex-1">
+      <div class="view-container p-6 flex flex-col justify-between h-full min-h-0 gap-5 flex-1 overflow-hidden">
         <!-- Top Header: Generator Selector + Utility Toolbar -->
         <div class="flex items-center justify-between gap-3 shrink-0">
           <!-- Generator Selector Pills (+ Standalone App Icon) -->
@@ -216,20 +220,23 @@ export class GeneratorView {
         <!-- Heroic Generated Value Display (Click to Copy when value is present) -->
         <div
           id="hero-value-container"
-          class="group relative py-6 px-4 bg-surface-inner ${
+          class="group relative py-4 px-4 bg-surface-inner ${
             hasValue
               ? 'hover:bg-surface-pillHover/50 hover:border-surface-cardBorder cursor-pointer'
               : 'cursor-default'
-          } border border-surface-innerBorder rounded-2xl transition-all flex flex-col items-center justify-center min-h-[110px] flex-1"
+          } border border-surface-innerBorder rounded-2xl transition-all flex flex-col items-center justify-center min-h-[110px] flex-1 overflow-hidden"
           ${hasValue ? 'title="Click to copy (C)"' : ''}
         >
-          <div class="font-mono text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider text-center break-all select-all flex flex-wrap items-center justify-center">
+          <div
+            id="hero-value-text"
+            class="w-full max-h-full font-mono ${fontSizeClass} ${trackingClass} font-bold text-center break-all select-all flex flex-wrap items-center justify-center my-auto overflow-hidden scrollbar-thin transition-none"
+          >
             ${formattedHtml}
           </div>
           ${
             hasValue
               ? `
-            <div class="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-content-muted flex items-center gap-1">
+            <div class="pointer-events-none absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-[11px] text-content-muted flex items-center gap-1 bg-surface-inner/80 px-1.5 py-0.5 rounded backdrop-blur-xs select-none">
               ${Icons.copy}
               <span>Copy</span>
             </div>
@@ -390,9 +397,66 @@ export class GeneratorView {
     `;
 
     this.bindEvents(state, currentValue);
+    this.fitHeroText();
+    requestAnimationFrame(() => this.fitHeroText());
+  }
+
+  public destroy() {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    if (this.copyTimeout) {
+      window.clearTimeout(this.copyTimeout);
+      this.copyTimeout = null;
+    }
+  }
+
+  private fitHeroText() {
+    if (this.isFitting) return;
+    const container = this.container.querySelector<HTMLElement>('#hero-value-container');
+    const textEl = this.container.querySelector<HTMLElement>('#hero-value-text');
+    if (!container || !textEl) return;
+
+    this.isFitting = true;
+    try {
+      textEl.style.fontSize = '';
+      textEl.style.lineHeight = '';
+      textEl.classList.remove('overflow-y-auto');
+      textEl.classList.add('overflow-hidden');
+
+      const style = window.getComputedStyle(container);
+      const paddingTop = parseFloat(style.paddingTop) || 0;
+      const paddingBottom = parseFloat(style.paddingBottom) || 0;
+
+      const maxAvailableHeight = container.clientHeight - paddingTop - paddingBottom;
+      if (maxAvailableHeight <= 0) return;
+
+      let currentSize = parseFloat(window.getComputedStyle(textEl).fontSize);
+      const minFontSize = 11;
+
+      while (textEl.scrollHeight > maxAvailableHeight && currentSize > minFontSize) {
+        currentSize = Math.max(minFontSize, currentSize - 1);
+        textEl.style.fontSize = `${currentSize}px`;
+        textEl.style.lineHeight = `${Math.round(currentSize * 1.25)}px`;
+      }
+
+      if (textEl.scrollHeight > maxAvailableHeight) {
+        textEl.classList.remove('overflow-hidden');
+        textEl.classList.add('overflow-y-auto');
+      }
+    } finally {
+      this.isFitting = false;
+    }
   }
 
   private bindEvents(state: AppState, currentValue: string) {
+    this.resizeObserver?.disconnect();
+    const heroContainer = this.container.querySelector<HTMLElement>('#hero-value-container');
+    if (heroContainer && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.fitHeroText();
+      });
+      this.resizeObserver.observe(heroContainer);
+    }
     this.container.querySelector('#btn-tab-num')?.addEventListener('click', () => {
       this.callbacks.onSelectType('num');
     });
@@ -480,3 +544,27 @@ export class GeneratorView {
     });
   }
 }
+
+/**
+ * Resolves the baseline Tailwind font size classes based on digit length.
+ */
+export function resolveHeroFontSizeClass(length: number): string {
+  if (length <= 4) return 'text-6xl';
+  if (length <= 8) return 'text-5xl';
+  if (length <= 16) return 'text-4xl';
+  if (length <= 24) return 'text-3xl';
+  if (length <= 40) return 'text-2xl';
+  if (length <= 64) return 'text-xl';
+  if (length <= 100) return 'text-base';
+  return 'text-sm';
+}
+
+/**
+ * Resolves the tracking letter spacing based on digit length.
+ */
+export function resolveHeroTrackingClass(length: number): string {
+  if (length <= 8) return 'tracking-wider';
+  if (length <= 24) return 'tracking-normal';
+  return 'tracking-tight';
+}
+

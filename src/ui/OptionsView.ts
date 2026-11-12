@@ -44,7 +44,7 @@ export class OptionsView {
     const title = isNum ? 'Numeric options' : 'Numeric fixed options';
 
     this.container.innerHTML = `
-      <div class="view-container p-5 md:p-6 flex flex-col justify-between h-full min-h-0 gap-5 flex-1">
+      <div class="view-container p-6 flex flex-col justify-between h-full min-h-0 gap-5 flex-1">
         <!-- Header -->
         <div class="flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3">
@@ -170,8 +170,8 @@ export class OptionsView {
           id="slider-fixed-len"
           type="range"
           min="${GENERATOR_LIMITS.MIN_DIGIT_LENGTH}"
-          max="32"
-          value="${Math.min(this.fixedLength, 32)}"
+          max="${GENERATOR_LIMITS.MAX_DIGIT_LENGTH}"
+          value="${this.fixedLength}"
           class="w-full accent-[var(--btn-primary-bg)] h-1.5 bg-surface-cardMuted rounded-lg cursor-pointer"
         />
 
@@ -260,9 +260,17 @@ export class OptionsView {
 
       const updateLength = (val: number) => {
         this.fixedLength = val;
-        if (slider) slider.value = Math.min(val, 32).toString();
+        if (slider) slider.value = val.toString();
         if (input) input.value = val.toString();
         if (display) display.textContent = val.toString();
+        this.container.querySelectorAll('.btn-fixed-preset').forEach(btn => {
+          const btnLen = parseInt(btn.getAttribute('data-preset-len') || '0', 10);
+          if (btnLen === val) {
+            btn.className = 'btn-fixed-preset px-3 py-1 rounded-lg text-xs font-mono transition-colors border bg-surface-subPillActive text-white border-surface-subPillActive shadow-sm';
+          } else {
+            btn.className = 'btn-fixed-preset px-3 py-1 rounded-lg text-xs font-mono transition-colors border bg-surface-subPill hover:bg-surface-pillHover text-content-muted hover:text-content-primary border-surface-subPillBorder';
+          }
+        });
         this.validateFixed();
       };
 
