@@ -10,7 +10,6 @@ import { RandomEngine } from './services/RandomEngine';
 import { AudioEngine } from './services/AudioEngine';
 import { KeyboardManager } from './services/KeyboardManager';
 import { GeneratorView } from './ui/GeneratorView';
-import { OptionsView } from './ui/OptionsView';
 import { HistoryView } from './ui/HistoryView';
 import { ShortcutsModal } from './ui/ShortcutsModal';
 
@@ -20,7 +19,6 @@ class App {
 
   private cardContainer: HTMLElement;
   private generatorView: GeneratorView;
-  private optionsView: OptionsView;
   private historyView: HistoryView;
   private shortcutsModal: ShortcutsModal;
   private keyboardManager: KeyboardManager;
@@ -60,27 +58,20 @@ class App {
     this.generatorView = new GeneratorView(this.cardContainer, {
       onSelectType: (type: GeneratorType) => this.handleSelectType(type),
       onGenerate: () => this.handleGenerate(),
-      onEditOptions: () => this.setView('options'),
       onOpenHistory: () => this.setView('history'),
       onCopyValue: (val: string) => this.handleCopyValue(val),
       onToggleSound: () => this.handleToggleSound(),
       onToggleTheme: () => this.handleToggleTheme(),
       onOpenShortcuts: () => this.shortcutsModal.toggle(),
-      onQuickUpdateNum: (opts: NumOptions) => {
+      onUpdateNum: (opts: NumOptions) => {
         this.storage.setNumOptions(opts);
         AudioEngine.playGenerateSound();
       },
-      onQuickUpdateNumFixed: (opts: NumFixedOptions) => {
+      onUpdateNumFixed: (opts: NumFixedOptions) => {
         this.storage.setNumFixedOptions(opts);
         AudioEngine.playGenerateSound();
       },
       onInstallApp: () => this.handleInstallApp(),
-    });
-
-    this.optionsView = new OptionsView(this.cardContainer, {
-      onBack: () => this.setView('generator'),
-      onSaveNumOptions: (opts: NumOptions) => this.storage.setNumOptions(opts),
-      onSaveNumFixedOptions: (opts: NumFixedOptions) => this.storage.setNumFixedOptions(opts),
     });
 
     this.historyView = new HistoryView(this.cardContainer, {
@@ -104,7 +95,11 @@ class App {
         }
       },
       onToggleOptions: () => {
-        this.setView(this.activeView === 'options' ? 'generator' : 'options');
+        if (this.activeView === 'generator') {
+          this.generatorView.focusOptions();
+        } else {
+          this.setView('generator');
+        }
       },
       onToggleHistory: () => {
         this.setView(this.activeView === 'history' ? 'generator' : 'history');
@@ -161,9 +156,6 @@ class App {
     switch (this.activeView) {
       case 'generator':
         this.generatorView.render(state);
-        break;
-      case 'options':
-        this.optionsView.render(state);
         break;
       case 'history':
         this.historyView.render(state);

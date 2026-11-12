@@ -43,17 +43,15 @@ export class KeyboardManager {
         activeElement.tagName === 'TEXTAREA' ||
         (activeElement as HTMLElement).isContentEditable);
 
-    if (e.key === 'Escape') {
-      this.actions.onEscape();
+    if (isEditingInput) {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+        (activeElement as HTMLElement).blur();
+      }
       return;
     }
 
-    if (isEditingInput) {
-      if (e.key === 'Enter') {
-        // Allow enter in inputs to blur or submit
-        (activeElement as HTMLElement).blur();
-        this.actions.onEscape();
-      }
+    if (e.key === 'Escape') {
+      this.actions.onEscape();
       return;
     }
 

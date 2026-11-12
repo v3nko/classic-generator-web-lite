@@ -38,7 +38,7 @@ export interface AppState {
   history: GeneratedItem[];
 }
 
-export type ActiveView = 'generator' | 'options' | 'history';
+export type ActiveView = 'generator' | 'history';
 
 export const GENERATOR_CONFIGS: Record<GeneratorType, {
   name: string;

@@ -75,6 +75,17 @@ body {
   background: var(--text-subdued);
 }
 
+/* Remove native spin buttons on number inputs for clean centered alignment */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
 /* Card constraints in standard browser mode */
 #card-root {
   min-height: min(460px, calc(100vh - 140px));

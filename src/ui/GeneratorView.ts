@@ -12,14 +12,13 @@ import { Icons } from './icons';
 export interface GeneratorViewCallbacks {
   onSelectType: (type: GeneratorType) => void;
   onGenerate: () => void;
-  onEditOptions: () => void;
   onOpenHistory: () => void;
   onCopyValue: (value: string) => void;
   onToggleSound: () => void;
   onToggleTheme: () => void;
   onOpenShortcuts: () => void;
-  onQuickUpdateNum: (options: NumOptions) => void;
-  onQuickUpdateNumFixed: (options: NumFixedOptions) => void;
+  onUpdateNum: (options: NumOptions) => void;
+  onUpdateNumFixed: (options: NumFixedOptions) => void;
   onInstallApp?: () => void;
 }
 
@@ -66,6 +65,17 @@ export class GeneratorView {
       this.isCopied = false;
       this.updateStatusBadge();
     }, 1800);
+  }
+
+  public focusOptions() {
+    const input =
+      this.container.querySelector<HTMLInputElement>('#input-range-length') ||
+      this.container.querySelector<HTMLInputElement>('#input-range-max') ||
+      this.container.querySelector<HTMLInputElement>('#input-range-min');
+    if (input) {
+      input.focus();
+      input.select();
+    }
   }
 
   private updateStatusBadge() {
@@ -245,13 +255,52 @@ export class GeneratorView {
           }
         </div>
 
-        <!-- Inner Sub-Card: Interactive Quick Adjuster -->
+        <!-- Primary Options Sub-Card -->
         <div class="p-3.5 bg-surface-inner border border-surface-innerBorder rounded-2xl flex flex-col gap-2.5 shrink-0">
           <div class="flex items-center justify-between text-xs">
-            <span class="text-content-muted font-medium">${isFixed ? 'Digit count' : 'Quick range'}</span>
-            <span class="font-mono text-xs font-semibold text-content-primary px-2 py-0.5 rounded bg-surface-card border border-surface-cardBorder shadow-xs">
-              ${isFixed ? `${state.options.num_fixed.length} digits` : `${state.options.num.min} – ${state.options.num.max}`}
-            </span>
+            <span class="text-content-muted font-medium">${isFixed ? 'Digit count' : 'Range'}</span>
+            ${
+              isFixed
+                ? `
+              <label
+                for="input-range-length"
+                class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-card border border-surface-cardBorder shadow-xs focus-within:border-content-muted transition-colors cursor-text"
+              >
+                <input
+                  id="input-range-length"
+                  type="number"
+                  min="${GENERATOR_LIMITS.MIN_DIGIT_LENGTH}"
+                  max="${GENERATOR_LIMITS.MAX_DIGIT_LENGTH}"
+                  value="${state.options.num_fixed.length}"
+                  style="width: ${Math.max(2, String(state.options.num_fixed.length).length)}ch;"
+                  class="bg-transparent text-center font-mono text-xs font-semibold text-content-primary outline-none p-0 m-0"
+                  title="Exact length in digits (${GENERATOR_LIMITS.MIN_DIGIT_LENGTH} - ${GENERATOR_LIMITS.MAX_DIGIT_LENGTH})"
+                />
+                <span class="text-content-muted text-xs select-none">digits</span>
+              </label>
+            `
+                : `
+              <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-card border border-surface-cardBorder shadow-xs focus-within:border-content-muted transition-colors">
+                <input
+                  id="input-range-min"
+                  type="number"
+                  value="${state.options.num.min}"
+                  style="width: ${Math.max(2, String(state.options.num.min).length)}ch;"
+                  class="bg-transparent text-center font-mono text-xs font-semibold text-content-primary outline-none p-0 m-0 cursor-text"
+                  title="Minimum value"
+                />
+                <span class="text-content-subdued select-none font-normal leading-none">–</span>
+                <input
+                  id="input-range-max"
+                  type="number"
+                  value="${state.options.num.max}"
+                  style="width: ${Math.max(2, String(state.options.num.max).length)}ch;"
+                  class="bg-transparent text-center font-mono text-xs font-semibold text-content-primary outline-none p-0 m-0 cursor-text"
+                  title="Maximum value"
+                />
+              </div>
+            `
+            }
           </div>
 
           ${
@@ -352,21 +401,12 @@ export class GeneratorView {
           }
         </div>
 
-        <!-- Bottom Action Pills: Edit Options & Generate -->
-        <div class="grid grid-cols-2 gap-3 pt-2 shrink-0">
-          <button
-            id="btn-edit-options"
-            type="button"
-            class="flex items-center justify-center gap-2 py-3 px-4 rounded-full bg-surface-cardMuted hover:bg-surface-pillHover text-content-secondary hover:text-content-primary font-medium text-sm border border-surface-innerBorder transition-all active:scale-[0.98]"
-          >
-            ${Icons.pencil}
-            <span>Edit options</span>
-          </button>
-
+        <!-- Bottom Action Pill: Generate -->
+        <div class="pt-2 shrink-0">
           <button
             id="btn-generate-value"
             type="button"
-            class="flex items-center justify-center gap-2 py-3 px-4 rounded-full bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:opacity-90 font-semibold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+            class="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-full bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:opacity-90 font-semibold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
           >
             ${Icons.sparkle}
             <span>Generate</span>
@@ -487,42 +527,130 @@ export class GeneratorView {
       });
     }
 
-    this.container.querySelector('#btn-edit-options')?.addEventListener('click', () => {
-      this.callbacks.onEditOptions();
-    });
-
     this.container.querySelector('#btn-generate-value')?.addEventListener('click', () => {
       this.callbacks.onGenerate();
     });
+
+    // Options inputs for Numeric fixed
+    const lenInput = this.container.querySelector<HTMLInputElement>('#input-range-length');
+    const commitFixedLength = () => {
+      if (!lenInput) return;
+      const val = parseInt(lenInput.value, 10);
+      if (
+        !isNaN(val) &&
+        val >= GENERATOR_LIMITS.MIN_DIGIT_LENGTH &&
+        val <= GENERATOR_LIMITS.MAX_DIGIT_LENGTH
+      ) {
+        if (val !== state.options.num_fixed.length) {
+          this.callbacks.onUpdateNumFixed({ length: val });
+        }
+      } else {
+        lenInput.value = state.options.num_fixed.length.toString();
+        lenInput.style.width = `${Math.max(2, lenInput.value.length)}ch`;
+      }
+    };
+
+    lenInput?.addEventListener('input', () => {
+      if (!lenInput) return;
+      lenInput.style.width = `${Math.max(2, lenInput.value.length)}ch`;
+    });
+
+    lenInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+        lenInput.blur();
+      }
+      e.stopPropagation();
+    });
+
+    lenInput?.addEventListener('change', commitFixedLength);
+    lenInput?.addEventListener('blur', commitFixedLength);
 
     // Quick controls listeners for Numeric fixed
     this.container.querySelectorAll('.btn-quick-fixed').forEach(btn => {
       btn.addEventListener('click', () => {
         const len = parseInt(btn.getAttribute('data-quick-fixed') || '6', 10);
-        this.callbacks.onQuickUpdateNumFixed({ length: len });
+        this.callbacks.onUpdateNumFixed({ length: len });
       });
     });
 
     this.container.querySelector('#btn-quick-fixed-dec')?.addEventListener('click', () => {
       const currentLen = state.options.num_fixed.length;
       if (currentLen > GENERATOR_LIMITS.MIN_DIGIT_LENGTH) {
-        this.callbacks.onQuickUpdateNumFixed({ length: currentLen - 1 });
+        this.callbacks.onUpdateNumFixed({ length: currentLen - 1 });
       }
     });
 
     this.container.querySelector('#btn-quick-fixed-inc')?.addEventListener('click', () => {
       const currentLen = state.options.num_fixed.length;
       if (currentLen < GENERATOR_LIMITS.MAX_DIGIT_LENGTH) {
-        this.callbacks.onQuickUpdateNumFixed({ length: currentLen + 1 });
+        this.callbacks.onUpdateNumFixed({ length: currentLen + 1 });
       }
     });
+
+    // Options inputs for Numeric range
+    const minInput = this.container.querySelector<HTMLInputElement>('#input-range-min');
+    const maxInput = this.container.querySelector<HTMLInputElement>('#input-range-max');
+
+    const commitRange = (relatedTarget: EventTarget | null) => {
+      if (!minInput || !maxInput) return;
+      // Do not commit or revert while moving focus between min and max inputs
+      if (relatedTarget === minInput || relatedTarget === maxInput) {
+        return;
+      }
+      const minVal = parseInt(minInput.value, 10);
+      const maxVal = parseInt(maxInput.value, 10);
+      if (!isNaN(minVal) && !isNaN(maxVal) && minVal < maxVal) {
+        if (minVal !== state.options.num.min || maxVal !== state.options.num.max) {
+          this.callbacks.onUpdateNum({ min: minVal, max: maxVal });
+        }
+      } else {
+        minInput.value = state.options.num.min.toString();
+        maxInput.value = state.options.num.max.toString();
+        minInput.style.width = `${Math.max(2, minInput.value.length)}ch`;
+        maxInput.style.width = `${Math.max(2, maxInput.value.length)}ch`;
+      }
+    };
+
+    minInput?.addEventListener('input', () => {
+      if (!minInput) return;
+      minInput.style.width = `${Math.max(2, minInput.value.length)}ch`;
+    });
+
+    maxInput?.addEventListener('input', () => {
+      if (!maxInput) return;
+      maxInput.style.width = `${Math.max(2, maxInput.value.length)}ch`;
+    });
+
+    const handleRangeKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+        (e.target as HTMLInputElement).blur();
+      }
+      e.stopPropagation();
+    };
+
+    minInput?.addEventListener('keydown', handleRangeKeydown);
+    maxInput?.addEventListener('keydown', handleRangeKeydown);
+
+    const handleRangeChange = () => {
+      const activeEl = document.activeElement;
+      if (activeEl === minInput || activeEl === maxInput) {
+        return;
+      }
+      commitRange(null);
+    };
+
+    minInput?.addEventListener('change', handleRangeChange);
+    maxInput?.addEventListener('change', handleRangeChange);
+
+    minInput?.addEventListener('blur', (e) => commitRange(e.relatedTarget));
+    maxInput?.addEventListener('blur', (e) => commitRange(e.relatedTarget));
 
     // Quick controls listeners for Numeric range
     this.container.querySelectorAll('.btn-quick-num').forEach(btn => {
       btn.addEventListener('click', () => {
         const min = parseInt(btn.getAttribute('data-quick-num-min') || '0', 10);
         const max = parseInt(btn.getAttribute('data-quick-num-max') || '100', 10);
-        this.callbacks.onQuickUpdateNum({ min, max });
+        this.callbacks.onUpdateNum({ min, max });
       });
     });
 
@@ -530,13 +658,13 @@ export class GeneratorView {
       const { min, max } = state.options.num;
       const step = max > 100 ? 50 : 10;
       const newMax = Math.max(min + 1, max - step);
-      this.callbacks.onQuickUpdateNum({ min, max: newMax });
+      this.callbacks.onUpdateNum({ min, max: newMax });
     });
 
     this.container.querySelector('#btn-quick-num-inc')?.addEventListener('click', () => {
       const { min, max } = state.options.num;
       const step = max >= 100 ? 50 : 10;
-      this.callbacks.onQuickUpdateNum({ min, max: max + step });
+      this.callbacks.onUpdateNum({ min, max: max + step });
     });
 
     this.container.querySelector('#btn-shortcuts-hint')?.addEventListener('click', () => {

@@ -58,9 +58,9 @@ export class ShortcutsModal {
       { key: 'C', desc: 'Copy currently displayed value' },
       { key: '1', desc: 'Switch to Numeric generator' },
       { key: '2', desc: 'Switch to Numeric fixed generator' },
-      { key: 'O', desc: 'Toggle Options editor' },
+      { key: 'O', desc: 'Focus options input' },
       { key: 'H', desc: 'Toggle History view' },
-      { key: 'Esc', desc: 'Return to generator workbench / close modal' },
+      { key: 'Esc', desc: 'Return from history / close modal' },
       { key: '?', desc: 'Show this keyboard shortcuts guide' },
     ];
 

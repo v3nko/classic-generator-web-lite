@@ -28,9 +28,9 @@ A desktop-first, lightweight, 100% client-side web version of Classic Generator.
   - Centered floating card with subtle border, shadow, and rounded corners.
   - High-contrast, large-format monospace display with alternating chunk contrast.
   - Sub-card displaying the immediately preceding generated value with one-click reuse or copy.
-  - Smooth in-card view transitions between **Generator**, **Options**, and **History**.
+  - Smooth in-card view transitions between **Generator** and **History**.
 - **Desktop Keyboard Navigation**:
-  - Full keyboard accessibility with <kbd>Space</kbd> / <kbd>Enter</kbd> to generate, <kbd>C</kbd> to copy, <kbd>1</kbd>/<kbd>2</kbd> for generator selection, <kbd>O</kbd> for options, <kbd>H</kbd> for history, and <kbd>Esc</kbd> to return.
+  - Full keyboard accessibility with <kbd>Space</kbd> / <kbd>Enter</kbd> to generate, <kbd>C</kbd> to copy, <kbd>1</kbd>/<kbd>2</kbd> for generator selection, <kbd>O</kbd> to focus options input, <kbd>H</kbd> for history, and <kbd>Esc</kbd> to return.
 - **Web Audio Feedback**:
   - Lightweight synthesized mechanical click/pop sounds generated directly through the Web Audio API without audio file assets.
   - Header audio toggle with persistent state.
@@ -47,7 +47,7 @@ A desktop-first, lightweight, 100% client-side web version of Classic Generator.
 | <kbd>C</kbd> | Copy currently displayed value to clipboard |
 | <kbd>1</kbd> | Switch to **Numeric** generator |
 | <kbd>2</kbd> | Switch to **Numeric fixed** generator |
-| <kbd>O</kbd> | Toggle **Options** editor |
+| <kbd>O</kbd> | Focus **Options** input |
 | <kbd>H</kbd> | Toggle **History** log |
 | <kbd>Esc</kbd> | Return to main generator view / dismiss overlays |
 | <kbd>?</kbd> | Show keyboard shortcuts guide |
