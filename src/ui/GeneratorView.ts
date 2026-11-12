@@ -109,7 +109,8 @@ export class GeneratorView {
 
     let formattedHtml = '';
     if (hasValue) {
-      const chunks = RandomEngine.formatChunked(currentValue, isFixed);
+      const isRecordFixed = state.lastGenerated?.type === 'num_fixed';
+      const chunks = RandomEngine.formatChunked(currentValue, isRecordFixed);
       // Format chunks with alternating contrast like the inspiration card (primary / muted)
       formattedHtml = chunks
         .map((chunk, idx) => {
